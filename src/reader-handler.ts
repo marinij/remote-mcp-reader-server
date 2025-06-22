@@ -262,11 +262,22 @@ app.get("/authorize", async (c) => {
 });
 
 app.post("/authorize", async (c) => {
-	const formData = await c.req.formData();
-	const apiToken = formData.get("apiToken") as string;
+	// Clone the request to read the body multiple times if needed
+	const request = c.req.raw.clone();
+	
+	// Check if this is a token submission by looking for apiToken in form data
+	let formData: FormData | null = null;
+	let apiToken: string | null = null;
+	
+	try {
+		formData = await c.req.formData();
+		apiToken = formData.get("apiToken") as string;
+	} catch (e) {
+		// If form parsing fails, it might be the approval form
+	}
 
 	// If we have an API token, this is the token submission
-	if (apiToken) {
+	if (apiToken && formData) {
 		const state = formData.get("state") as string;
 		const oauthReqInfo = JSON.parse(atob(state)) as AuthRequest;
 
@@ -309,7 +320,8 @@ app.post("/authorize", async (c) => {
 	}
 
 	// Otherwise, this is the approval form submission
-	const { state, headers } = await parseRedirectApproval(c.req.raw, env.COOKIE_ENCRYPTION_KEY);
+	// Use the cloned request to avoid body already used error
+	const { state, headers } = await parseRedirectApproval(request, env.COOKIE_ENCRYPTION_KEY);
 	if (!state.oauthReqInfo) {
 		return c.text("Invalid request", 400);
 	}
