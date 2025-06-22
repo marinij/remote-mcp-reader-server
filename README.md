@@ -43,6 +43,15 @@ cd remote-mcp-reader-server
 npm install
 ```
 
+3. Set environment variables:
+```bash
+# Use openssl to generate a secure cookie encryption key
+openssl rand -hex 32
+
+# Store it in Cloudflare
+wrangler secret put COOKIE_ENCRYPTION_KEY
+```
+
 ### Development
 
 Run the development server:
@@ -58,28 +67,6 @@ npm run deploy
 ```
 
 ## Usage
-
-### For MCP Clients
-
-1. **Claude Desktop** (with mcp-remote adapter):
-```json
-{
-  "mcpServers": {
-    "readwise-reader": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://your-worker.workers.dev/sse"
-      ]
-    }
-  }
-}
-```
-
-2. **Cloudflare AI Playground**: 
-   - Navigate to the AI Playground
-   - Enter your MCP server URL: `https://remote-mcp-reader-server.julien-marinica.workers.dev/sse`
-   - Click Connect and follow the authentication flow
 
 ### Authentication Flow
 
@@ -103,11 +90,3 @@ Based on the [Cloudflare blog post about remote MCP servers](https://blog.cloudf
 - **McpAgent**: Cloudflare's MCP SDK for handling remote transport
 - **Durable Objects**: Stateful sessions with isolated storage
 - **Workers KV**: Encrypted token storage
-
-## Contributing
-
-Pull requests are welcome! Please ensure all code follows the existing patterns and includes appropriate error handling.
-
-## License
-
-MIT
