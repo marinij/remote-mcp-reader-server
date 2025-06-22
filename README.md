@@ -1,120 +1,113 @@
-# Remote MCP Server on Cloudflare
+# Readwise Reader Remote MCP Server
 
-Let's get a remote MCP server up-and-running on Cloudflare Workers complete with OAuth login!
+A remote Model Context Protocol (MCP) server that provides access to your Readwise Reader documents through a secure OAuth flow. Built on Cloudflare Workers.
 
-## Develop locally
+## Features
 
+- **Secure Authentication**: Users authenticate using their own Readwise API tokens
+- **Document Listing**: List and filter documents from your Reader library
+- **OAuth Flow**: Standard OAuth 2.0 flow for secure token management
+- **Cloudflare Workers**: Serverless deployment with global edge distribution
+
+## Available Tools
+
+### `listDocuments`
+List documents from your Readwise Reader library with optional filters:
+- `location`: Filter by document location (new, later, shortlist, archive, feed)
+- `category`: Filter by category (article, email, rss, highlight, note, pdf, epub, tweet, video)
+- `tag`: Filter by tag key
+- `updatedAfter`: Fetch only documents updated after this date (ISO 8601 format)
+- `limit`: Maximum number of documents to return (default: 20, max: 100)
+
+### `getDocument`
+Get detailed information about a specific document by ID.
+
+## Setup
+
+### Prerequisites
+
+1. A Readwise account with API access
+2. A Cloudflare account
+3. Node.js and npm installed locally
+
+### Installation
+
+1. Clone this repository:
 ```bash
-# clone the repository
-git clone https://github.com/cloudflare/ai.git
-# Or if using ssh:
-# git clone git@github.com:cloudflare/ai.git
-
-# install dependencies
-cd ai
-# Note: using pnpm instead of just "npm"
-pnpm install
-
-# run locally
-npx nx dev remote-mcp-server
+git clone <repository-url>
+cd remote-mcp-reader-server
 ```
 
-You should be able to open [`http://localhost:8787/`](http://localhost:8787/) in your browser
+2. Install dependencies:
+```bash
+npm install
+```
 
-## Connect the MCP inspector to your server
+### Development
 
-To explore your new MCP api, you can use the [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector).
+Run the development server:
+```bash
+npm run dev
+```
 
-- Start it with `npx @modelcontextprotocol/inspector`
-- [Within the inspector](http://localhost:5173), switch the Transport Type to `SSE` and enter `http://localhost:8787/sse` as the URL of the MCP server to connect to, and click "Connect"
-- You will navigate to a (mock) user/password login screen. Input any email and pass to login.
-- You should be redirected back to the MCP Inspector and you can now list and call any defined tools!
+### Deployment
 
-<div align="center">
-  <img src="img/mcp-inspector-sse-config.png" alt="MCP Inspector with the above config" width="600"/>
-</div>
+Deploy to Cloudflare Workers:
+```bash
+npm run deploy
+```
 
-<div align="center">
-  <img src="img/mcp-inspector-successful-tool-call.png" alt="MCP Inspector with after a tool call" width="600"/>
-</div>
+## Usage
 
-## Connect Claude Desktop to your local MCP server
+### For MCP Clients
 
-The MCP inspector is great, but we really want to connect this to Claude! Follow [Anthropic's Quickstart](https://modelcontextprotocol.io/quickstart/user) and within Claude Desktop go to Settings > Developer > Edit Config to find your configuration file.
-
-Open the file in your text editor and replace it with this configuration:
-
+1. **Claude Desktop** (with mcp-remote adapter):
 ```json
 {
   "mcpServers": {
-    "math": {
+    "readwise-reader": {
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:8787/sse"
+        "https://your-worker.workers.dev/sse"
       ]
     }
   }
 }
 ```
 
-This will run a local proxy and let Claude talk to your MCP server over HTTP
+2. **Cloudflare AI Playground**: 
+   - Navigate to the AI Playground
+   - Enter your MCP server URL: `https://remote-mcp-reader-server.julien-marinica.workers.dev/sse`
+   - Click Connect and follow the authentication flow
 
-When you open Claude a browser window should open and allow you to login. You should see the tools available in the bottom right. Given the right prompt Claude should ask to call the tool.
+### Authentication Flow
 
-<div align="center">
-  <img src="img/available-tools.png" alt="Clicking on the hammer icon shows a list of available tools" width="600"/>
-</div>
+1. When connecting, users will be prompted to approve the MCP client
+2. After approval, users enter their Readwise API token
+3. The token is securely encrypted and stored
+4. Users can find their API token at: https://readwise.io/access_token
 
-<div align="center">
-  <img src="img/claude-does-math-the-fancy-way.png" alt="Claude answers the prompt 'I seem to have lost my calculator and have run out of fingers. Could you use the math tool to add 23 and 19?' by invoking the MCP add tool" width="600"/>
-</div>
+## Security
 
-## Deploy to Cloudflare
+- API tokens are encrypted before storage
+- OAuth tokens are issued separately from Readwise tokens
+- All communication uses HTTPS
+- Tokens are scoped to individual users
 
-1. `npx wrangler kv namespace create OAUTH_KV`
-2. Follow the guidance to add the kv namespace ID to `wrangler.jsonc`
-3. `npm run deploy`
+## Architecture
 
-## Call your newly deployed remote MCP server from a remote MCP client
+Based on the [Cloudflare blog post about remote MCP servers](https://blog.cloudflare.com/remote-model-context-protocol-servers-mcp/), this implementation uses:
 
-Just like you did above in "Develop locally", run the MCP inspector:
+- **workers-oauth-provider**: OAuth 2.0 provider implementation
+- **McpAgent**: Cloudflare's MCP SDK for handling remote transport
+- **Durable Objects**: Stateful sessions with isolated storage
+- **Workers KV**: Encrypted token storage
 
-`npx @modelcontextprotocol/inspector@latest`
+## Contributing
 
-Then enter the `workers.dev` URL (ex: `worker-name.account-name.workers.dev/sse`) of your Worker in the inspector as the URL of the MCP server to connect to, and click "Connect".
+Pull requests are welcome! Please ensure all code follows the existing patterns and includes appropriate error handling.
 
-You've now connected to your MCP server from a remote MCP client.
+## License
 
-## Connect Claude Desktop to your remote MCP server
-
-Update the Claude configuration file to point to your `workers.dev` URL (ex: `worker-name.account-name.workers.dev/sse`) and restart Claude 
-
-```json
-{
-  "mcpServers": {
-    "math": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://worker-name.account-name.workers.dev/sse"
-      ]
-    }
-  }
-}
-```
-
-## Debugging
-
-Should anything go wrong it can be helpful to restart Claude, or to try connecting directly to your
-MCP server on the command line with the following command.
-
-```bash
-npx mcp-remote http://localhost:8787/sse
-```
-
-In some rare cases it may help to clear the files added to `~/.mcp-auth`
-
-```bash
-rm -rf ~/.mcp-auth
-```
+MIT
