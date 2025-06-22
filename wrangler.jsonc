@@ -30,6 +30,5 @@
 	],
 	"observability": {
 		"enabled": true
-	},
-	"assets": { "directory": "./static/", "binding": "ASSETS" }
+	}
 }
