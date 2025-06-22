@@ -183,12 +183,10 @@ function renderTokenEntryPage(oauthReqInfo: AuthRequest): Response {
 							type="password" 
 							id="apiToken" 
 							name="apiToken" 
-							placeholder="readwise_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+							placeholder="Enter your Readwise API token"
 							required
-							pattern="readwise_[A-Za-z0-9]{38}"
-							title="API token should start with 'readwise_' followed by 38 characters"
 						>
-						<div class="error" id="error">Please enter a valid Readwise API token</div>
+						<div class="error" id="error">Please enter your Readwise API token</div>
 						
 						<button type="submit" class="button" id="submitBtn">
 							Connect Account
@@ -209,8 +207,8 @@ function renderTokenEntryPage(oauthReqInfo: AuthRequest): Response {
 					const submitBtn = document.getElementById('submitBtn');
 					const errorDiv = document.getElementById('error');
 					
-					// Basic validation
-					if (!apiToken.match(/^readwise_[A-Za-z0-9]{38}$/)) {
+					// Check if token is provided
+					if (!apiToken || apiToken.trim() === '') {
 						errorDiv.style.display = 'block';
 						return;
 					}
