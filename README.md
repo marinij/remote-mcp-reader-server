@@ -68,6 +68,24 @@ npm run deploy
 
 ## Usage
 
+### MCP Clients
+
+**Claude Desktop**:
+```json
+{
+  "mcpServers": {
+    "readwise-reader": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://remote-mcp-reader-server.julien-marinica.workers.dev/sse"
+      ]
+    }
+  }
+}
+```
+
 ### Authentication Flow
 
 1. When connecting, users will be prompted to approve the MCP client
