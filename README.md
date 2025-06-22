@@ -22,50 +22,6 @@ List documents from your Readwise Reader library with optional filters:
 ### `getDocument`
 Get detailed information about a specific document by ID.
 
-## Setup
-
-### Prerequisites
-
-1. A Readwise account with API access
-2. A Cloudflare account
-3. Node.js and npm installed locally
-
-### Installation
-
-1. Clone this repository:
-```bash
-git clone <repository-url>
-cd remote-mcp-reader-server
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Set environment variables:
-```bash
-# Use openssl to generate a secure cookie encryption key
-openssl rand -hex 32
-
-# Store it in Cloudflare
-wrangler secret put COOKIE_ENCRYPTION_KEY
-```
-
-### Development
-
-Run the development server:
-```bash
-npm run dev
-```
-
-### Deployment
-
-Deploy to Cloudflare Workers:
-```bash
-npm run deploy
-```
-
 ## Usage
 
 ### MCP Clients
