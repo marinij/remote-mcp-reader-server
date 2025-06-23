@@ -409,36 +409,3 @@ export const parseApproveFormBody = async (body: {
 export type Props = {
 	apiToken: string;
 };
-
-// Helper types for Reader API responses
-export interface ReaderDocument {
-	id: string;
-	url: string;
-	source_url: string;
-	title: string;
-	author: string;
-	source: string;
-	category: string;
-	location: string;
-	tags: Record<string, unknown>;
-	site_name: string;
-	word_count: number;
-	created_at: string;
-	updated_at: string;
-	notes: string;
-	published_date: string | null;
-	summary: string;
-	image_url: string;
-	parent_id: string | null;
-	reading_progress: number;
-	first_opened_at: string | null;
-	last_opened_at: string | null;
-	saved_at: string;
-	last_moved_at: string;
-}
-
-export interface ReaderListResponse {
-	count: number;
-	nextPageCursor: string | null;
-	results: ReaderDocument[];
-}
